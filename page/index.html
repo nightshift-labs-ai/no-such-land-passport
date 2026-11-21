@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Halqará Suyu — passport spread</title>
+<style>
+:root{--ink:#1c232c;--label:#56606a;--print:#24434f;--hair:rgba(36,67,79,.45);--paper:#f1e9d4}
+html,body{margin:0;width:1024px;height:1024px;overflow:hidden}
+body{background:radial-gradient(ellipse at 50% 46%,#3b403d 0%,#2a2e2c 55%,#1d201f 100%);
+  font-family:'Ubuntu Sans','Ubuntu',sans-serif;color:var(--ink)}
+.cover{position:absolute;left:8px;top:72px;width:1008px;height:880px;border-radius:16px;
+  background:linear-gradient(90deg,#3f171c,#55222a 48%,#3a1418 50%,#55222a 52%,#3f171c);
+  box-shadow:0 22px 44px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.07)}
+.page{position:absolute;top:82px;width:494px;height:860px;background:var(--paper);overflow:hidden}
+#L{left:18px;border-radius:5px 0 0 5px}
+#R{left:512px;border-radius:0 5px 5px 0}
+.layer{position:absolute;left:0;top:0}
+.shadeL{position:absolute;right:0;top:0;width:46px;height:100%;background:linear-gradient(to left,rgba(70,45,20,.26),rgba(70,45,20,0))}
+.shadeR{position:absolute;left:0;top:0;width:46px;height:100%;background:linear-gradient(to right,rgba(70,45,20,.30),rgba(70,45,20,0))}
+.lab{position:absolute;font-size:10.5px;line-height:12px;color:var(--label);letter-spacing:.02em;white-space:nowrap}
+.lab i{font-style:italic}
+.val{position:absolute;font-size:17px;line-height:20px;font-weight:500;letter-spacing:.04em;white-space:nowrap}
+.serif{font-family:'DejaVu Serif',serif}
+.pno{position:absolute;top:12px;font-size:10.5px;color:var(--label)}
+.photo{position:absolute;left:24px;top:176px;width:208px;height:268px;object-fit:cover;object-position:50% 28%;
+  filter:saturate(.88) contrast(1.03);outline:.6px solid rgba(0,0,0,.35)}
+.ghost{position:absolute;left:386px;top:578px;width:80px;height:103px;object-fit:cover;object-position:50% 28%;
+  filter:grayscale(1) contrast(1.25) brightness(1.08);opacity:.26;mix-blend-mode:multiply}
+.hair{position:absolute;left:24px;width:446px;height:0;border-top:.75px solid var(--hair)}
+</style></head>
+<body>
+<div class="cover"></div>
+
+<!-- LEFT: data page -->
+<div class="page" id="L">
+  <svg class="layer" id="guilloche" width="494" height="860"></svg>
+  <svg class="layer" id="paperL" width="494" height="860"></svg>
+  <div class="pno" style="left:14px">2</div>
+  <svg class="layer" width="494" height="110" style="left:0;top:0">
+    <g transform="translate(24,24)" fill="none" stroke="#24434f" stroke-width="1.3" stroke-linejoin="round">
+      <circle cx="30" cy="30" r="29"/>
+      <circle cx="30" cy="30" r="25.5" stroke-width=".6"/>
+      <circle cx="30" cy="20" r="6"/>
+      <path d="M8 44 L20 27 L26 35 L34 22 L52 44 Z"/>
+      <path d="M8 49 H52" stroke-width=".8"/>
+    </g>
+  </svg>
+  <div class="serif" style="position:absolute;left:98px;top:22px;font-size:25px;letter-spacing:.1em;color:var(--print)">HALQARÁ SUYU</div>
+  <div class="serif" style="position:absolute;left:99px;top:55px;font-size:13px;letter-spacing:.22em;color:var(--print)">REPUBLIC OF HALQARA</div>
+  <div style="position:absolute;left:99px;top:75px;font-size:11px;letter-spacing:.32em;color:var(--label)">PASAQ · PASSPORT</div>
+  <div class="hair" style="top:104px"></div>
+  <div id="fields"></div>
+  <img class="photo" src="../art/portrait.jpg" alt="">
+  <svg class="layer" width="494" height="860" id="seal"></svg>
+  <img class="ghost" src="../art/portrait.jpg" alt="">
+  <svg class="layer" width="494" height="860" id="sig"></svg>
+  <svg class="layer" width="494" height="860" id="mrz"></svg>
+  <div class="shadeL"></div>
+</div>
+
+<!-- RIGHT: visa page -->
+<div class="page" id="R">
+  <svg class="layer" id="paperR" width="494" height="860"></svg>
+  <div class="pno" style="right:14px">3</div>
+  <svg class="layer" id="visa" width="494" height="860"></svg>
+  <div class="shadeR"></div>
+</div>
+
+<script src="mrz.js"></script>
+<script>
+var NS='http://www.w3.org/2000/svg';
+function el(parent,tag,attrs,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;parent.appendChild(e);return e;}
+var P=PASSPORT;
+
+/* ---------- paper fibre texture (both pages) ---------- */
+['paperL','paperR'].forEach(function(id,i){
+  var s=document.getElementById(id);
+  s.innerHTML='<filter id="fib'+i+'"><feTurbulence type="fractalNoise" baseFrequency="0.9 0.35" numOctaves="3" seed="'+(7+i)+'"/>'+
+  '<feColorMatrix values="0 0 0 0 .45  0 0 0 0 .35  0 0 0 0 .2  0 0 0 -1.1 .62"/></filter>'+
+  '<rect width="494" height="860" filter="url(#fib'+i+')" opacity=".16"/>';
+});
+
+/* ---------- guilloche security background, data page only ---------- */
+(function(){
+  var g=document.getElementById('guilloche'), d='', k, t, x, y;
+  el(g,'clipPath',{id:'gclip'}).appendChild(document.createElementNS(NS,'rect'));
+  var cr=g.querySelector('#gclip rect'); cr.setAttribute('width','494'); cr.setAttribute('height','722');
+  var grp=el(g,'g',{'clip-path':'url(#gclip)',fill:'none'});
+  // horizontal wave bands
+  for(k=0;k<82;k++){
+    var y0=6+k*8.8; d='M0 '+y0;
+    for(x=0;x<=494;x+=6){ y=y0+3.2*Math.sin(x/21+k*0.55)+1.6*Math.sin(x/53-k*0.3); d+=' L'+x+' '+y.toFixed(2); }
+    el(grp,'path',{d:d,stroke:'#b78c78','stroke-width':'.5',opacity:'.30'});
+  }
+  // rosette behind the field block
+  var cx=300, cy=330;
+  for(k=0;k<36;k++){
+    d=''; var ph=k*Math.PI/18;
+    for(t=0;t<=Math.PI*2+0.01;t+=Math.PI/180){
+      var r=118+34*Math.sin(9*t+ph)+12*Math.sin(23*t-ph);
+      x=cx+r*Math.cos(t); y=cy+r*Math.sin(t);
+      d+=(t===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+    }
+    el(grp,'path',{d:d+'Z',stroke:'#5f9580','stroke-width':'.4',opacity:'.15'});
+  }
+  // second, finer rosette near the signature line
+  cx=250; cy=630;
+  for(k=0;k<24;k++){
+    d=''; ph=k*Math.PI/12;
+    for(t=0;t<=Math.PI*2+0.01;t+=Math.PI/180){
+      r=70+16*Math.sin(12*t+ph);
+      x=cx+r*1.9*Math.cos(t); y=cy+r*0.62*Math.sin(t);
+      d+=(t===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+    }
+    el(grp,'path',{d:d+'Z',stroke:'#5f9580','stroke-width':'.35',opacity:'.10'});
+  }
+})();
+
+/* ---------- visual inspection zone fields ---------- */
+(function(){
+  var f=document.getElementById('fields');
+  function field(x,y,own,en,value,extra){
+    var l=document.createElement('div'); l.className='lab'; l.style.left=x+'px'; l.style.top=y+'px';
+    l.innerHTML=own+' / <i>'+en+'</i>'; f.appendChild(l);
+    var v=document.createElement('div'); v.className='val'; v.style.left=x+'px'; v.style.top=(y+14)+'px';
+    v.textContent=value; if(extra) for(var k in extra) v.style[k]=extra[k]; f.appendChild(v);
+  }
+  field(24,116,'Tipu','Type',P.type);
+  field(112,116,'Suyu kod','Code',P.code);
+  field(248,116,'Pasaq ñüm','Passport No.',P.number,{color:'#7a1f1f',letterSpacing:'.09em'});
+  field(248,176,'Ayllë','Surname',P.surname);
+  field(248,228,'Sutikë','Given names',P.given);
+  field(248,280,'Llaqtë','Nationality',P.nationality);
+  field(248,332,'Paqarë kuñ','Date of birth',vizDate(P.dob));
+  field(248,384,'Warhë','Sex',P.sex);
+  field(318,384,'Paqarë marka','Place of birth',P.birthplace);
+  field(24,462,'Quyë kuñ','Date of issue',vizDate(P.issue));
+  field(248,462,'Quyë marka','Place of issue',P.placeOfIssue);
+  field(24,514,'Tukuyë kuñ','Date of expiry',vizDate(P.expiry));
+  field(248,514,'Kamachë','Authority',P.authority);
+  var l=document.createElement('div'); l.className='lab'; l.style.left='24px'; l.style.top='580px';
+  l.innerHTML='Qillqë / <i>Holder’s signature</i>'; f.appendChild(l);
+})();
+
+/* ---------- dry (embossed) seal over the photo corner ---------- */
+(function(){
+  var s=document.getElementById('seal'), cx=222, cy=430, r=34;
+  el(s,'path',{id:'sealp',d:'M'+(cx-r+8)+' '+cy+' a'+(r-8)+' '+(r-8)+' 0 1 1 '+(2*(r-8))+' 0 a'+(r-8)+' '+(r-8)+' 0 1 1 '+(-2*(r-8))+' 0',fill:'none'});
+  [[0.8,'rgba(0,0,0,.22)'],[-0.8,'rgba(255,255,255,.55)']].forEach(function(o){
+    var g=el(s,'g',{transform:'translate('+o[0]+','+o[0]+')',fill:'none',stroke:o[1],'stroke-width':'1'});
+    el(g,'circle',{cx:cx,cy:cy,r:r}); el(g,'circle',{cx:cx,cy:cy,r:r-14});
+    var t=el(s,'text',{transform:'translate('+o[0]+','+o[0]+')','font-size':'7.5','letter-spacing':'1.2',fill:o[1],'font-family':'Ubuntu Sans, Ubuntu, sans-serif'});
+    el(t,'textPath',{href:'#sealp',textLength:String(Math.round(2*Math.PI*(r-8)*0.96))},'PASAQ WASI · QORIMARKA · HLQ ·');
+  });
+})();
+
+/* ---------- holder's signature (navy ink) ---------- */
+(function(){
+  var s=document.getElementById('sig');
+  el(s,'path',{d:'M34 650 C38 626 44 606 47 610 C50 616 43 642 45 652 C50 640 55 616 59 606 C61 620 56 642 60 652 '+
+    'C66 642 70 620 74 610 C76 626 72 646 78 650 C86 648 88 632 97 630 C105 629 103 645 96 647 C89 649 92 632 106 633 '+
+    'C114 634 112 646 121 645 C128 644 126 632 133 630 L131 646 C140 640 146 618 158 612 C176 604 190 616 186 634 '+
+    'C182 652 160 654 156 640 C152 626 172 618 188 630 C196 637 200 654 214 652 C222 650 224 634 232 632 C238 631 236 646 244 646 '+
+    'C252 646 254 628 262 630 C270 632 262 648 272 648 C286 648 300 632 330 626',
+    fill:'none',stroke:'#24346b','stroke-width':'1.7','stroke-linecap':'round','stroke-linejoin':'round',opacity:'.9'});
+  el(s,'path',{d:'M110 600 l6 -4',stroke:'#24346b','stroke-width':'1.6','stroke-linecap':'round',opacity:'.85'});
+})();
+
+/* ---------- machine-readable zone ---------- */
+(function(){
+  var s=document.getElementById('mrz'), L=mrzLines();
+  el(s,'rect',{x:0,y:722,width:494,height:138,fill:'#f4eedd'});
+  el(s,'line',{x1:24,x2:470,y1:722.5,y2:722.5,stroke:'rgba(36,67,79,.45)','stroke-width':'.75'});
+  [L[0],L[1]].forEach(function(line,i){
+    el(s,'text',{x:24,y:778+i*34,'font-family':'DejaVu Sans Mono, monospace','font-size':'18.5',
+      textLength:'446',lengthAdjust:'spacing',fill:'#15191e','xml:space':'preserve'},line);
+  });
+  document.body.setAttribute('data-mrz',L.join('|'));
+})();
+
+/* ---------- visa page: stamps and the high-pass permit ---------- */
+(function(){
+  var s=document.getElementById('visa');
+  var FONT='Ubuntu Sans, Ubuntu, sans-serif';
+  var defs=el(s,'defs',{});
+  // uneven ink: speckle mask + slight edge wobble, a different seed per stamp
+  function inkFilter(id,seed,base){
+    defs.insertAdjacentHTML('beforeend',
+      '<filter id="'+id+'" x="-10%" y="-10%" width="120%" height="120%">'+
+      '<feTurbulence type="fractalNoise" baseFrequency="'+(base||0.75)+'" numOctaves="2" seed="'+seed+'" result="n"/>'+
+      '<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="m"/>'+
+      '<feComposite in="SourceGraphic" in2="m" operator="in" result="s"/>'+
+      '<feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="'+(seed+11)+'" result="w"/>'+
+      '<feDisplacementMap in="s" in2="w" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>');
+  }
+  for(var i=1;i<=8;i++) inkFilter('ink'+i,i*13,0.7+i*0.03);
+
+  // header
+  el(s,'text',{x:247,y:32,'text-anchor':'middle','font-family':FONT,'font-size':'11','letter-spacing':'3.4',fill:'#56606a'},'WILLQË · VISAS');
+  el(s,'line',{x1:24,x2:170,y1:28.5,y2:28.5,stroke:'rgba(36,67,79,.45)','stroke-width':'.75'});
+  el(s,'line',{x1:324,x2:470,y1:28.5,y2:28.5,stroke:'rgba(36,67,79,.45)','stroke-width':'.75'});
+
+  function txt(g,x,y,t,size,o){o=o||{};
+    return el(g,'text',{x:x,y:y,'text-anchor':o.anchor||'middle','font-family':o.family||FONT,'font-size':size,
+      'font-weight':o.w||'500','letter-spacing':o.ls||'0',fill:'currentColor'},t);}
+  function arrow(g,x,y,dir){ // dir 1 = arrival (points in), -1 = departure
+    var d=dir>0?'M'+(x-9)+' '+y+' H'+(x+5)+' M'+(x+1)+' '+(y-4)+' L'+(x+6)+' '+y+' L'+(x+1)+' '+(y+4)
+                :'M'+(x+9)+' '+y+' H'+(x-5)+' M'+(x-1)+' '+(y-4)+' L'+(x-6)+' '+y+' L'+(x-1)+' '+(y+4);
+    el(g,'path',{d:d,fill:'none',stroke:'currentColor','stroke-width':'1.6','stroke-linecap':'round'});
+  }
+  var uid=0;
+  function circleStamp(cx,cy,r,rot,color,ring,l1,l2,date,place,post,dir,f,op,sc){
+    sc=sc||1;
+    var g=el(s,'g',{transform:'rotate('+rot+' '+cx+' '+cy+') translate('+cx+' '+cy+') scale('+sc+') translate('+(-cx)+' '+(-cy)+')',color:color,filter:'url(#'+f+')',opacity:op||.86});
+    el(g,'circle',{cx:cx,cy:cy,r:r,fill:'none',stroke:'currentColor','stroke-width':'2.4'});
+    el(g,'circle',{cx:cx,cy:cy,r:r-4,fill:'none',stroke:'currentColor','stroke-width':'.9'});
+    el(g,'circle',{cx:cx,cy:cy,r:r-21,fill:'none',stroke:'currentColor','stroke-width':'1.3'});
+    var id='rp'+(uid++), rr=r-13.5;
+    el(g,'path',{id:id,d:'M'+(cx-rr)+' '+cy+' a'+rr+' '+rr+' 0 1 1 '+(2*rr)+' 0 a'+rr+' '+rr+' 0 1 1 '+(-2*rr)+' 0',fill:'none'});
+    var t=el(g,'text',{'font-family':FONT,'font-size':'9.5','font-weight':'700',fill:'currentColor','letter-spacing':'1'});
+    el(t,'textPath',{href:'#'+id,textLength:String((2*Math.PI*rr*0.975).toFixed(1)),lengthAdjust:'spacing'},ring);
+    arrow(g,cx,cy-33,dir);
+    txt(g,cx,cy-17,l1,9.5,{w:'700',ls:'.6'});
+    txt(g,cx,cy-6,l2,9,{ls:'.4'});
+    txt(g,cx,cy+12,date,15,{w:'700',ls:'.3'});
+    txt(g,cx,cy+26,place,8.5,{w:'600'});
+    txt(g,cx,cy+36,post,8.5,{});
+    return g;
+  }
+  function rectStamp(x,y,w,h,rot,color,head,l1,date,foot,dir,f,op){
+    var g=el(s,'g',{transform:'rotate('+rot+' '+(x+w/2)+' '+(y+h/2)+')',color:color,filter:'url(#'+f+')',opacity:op||.85});
+    el(g,'rect',{x:x,y:y,width:w,height:h,rx:3,fill:'none',stroke:'currentColor','stroke-width':'2.4'});
+    el(g,'rect',{x:x+4.5,y:y+4.5,width:w-9,height:h-9,rx:1.5,fill:'none',stroke:'currentColor','stroke-width':'.9'});
+    txt(g,x+w/2,y+23,head,14,{w:'700',ls:'2.6'});
+    el(g,'line',{x1:x+14,x2:x+w-14,y1:y+30,y2:y+30,stroke:'currentColor','stroke-width':'.9'});
+    arrow(g,x+24,y+43,dir);
+    txt(g,x+w/2+8,y+47,l1,10,{w:'600',ls:'.6'});
+    txt(g,x+w/2,y+72,date,19,{w:'700',ls:'.6'});
+    txt(g,x+w/2,y+92,foot,9.5,{w:'500',ls:'.3'});
+    return g;
+  }
+  function triStamp(cx,cy,side,rot,color,head,l1,date,place,dir,f,op){
+    var h=side*Math.sqrt(3)/2, top=cy-h*2/3, bot=cy+h/3;
+    var g=el(s,'g',{transform:'rotate('+rot+' '+cx+' '+cy+')',color:color,filter:'url(#'+f+')',opacity:op||.86});
+    el(g,'path',{d:'M'+cx+' '+top+' L'+(cx+side/2)+' '+bot+' L'+(cx-side/2)+' '+bot+' Z',fill:'none',stroke:'currentColor','stroke-width':'2.5','stroke-linejoin':'round'});
+    var k=8, s2=side-k*2*Math.sqrt(3), h2=s2*Math.sqrt(3)/2, t2=cy-h2*2/3, b2=cy+h2/3;
+    el(g,'path',{d:'M'+cx+' '+t2+' L'+(cx+s2/2)+' '+b2+' L'+(cx-s2/2)+' '+b2+' Z',fill:'none',stroke:'currentColor','stroke-width':'.9','stroke-linejoin':'round'});
+    arrow(g,cx,cy-30,dir);
+    txt(g,cx,cy-11,place,9,{w:'600',ls:'.4'});
+    txt(g,cx,cy+3,l1,9.5,{w:'700',ls:'.5'});
+    txt(g,cx,cy+21,date,14.5,{w:'700',ls:'.3'});
+    txt(g,cx,cy+38,head,12,{w:'700',ls:'2.4'});
+    return g;
+  }
+
+  /* --- High Pass Permit (printed sticker), the telling detail --- */
+  var X=22, Y=506, W=450, H=318;
+  var sg=el(s,'g',{transform:'rotate(-0.6 '+(X+W/2)+' '+(Y+H/2)+')'});
+  defs.insertAdjacentHTML('beforeend','<linearGradient id="stk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efe3cc"/><stop offset=".55" stop-color="#ead9c4"/><stop offset="1" stop-color="#e6dccb"/></linearGradient>'+
+    '<clipPath id="stkclip"><rect x="'+X+'" y="'+Y+'" width="'+W+'" height="'+H+'" rx="4"/></clipPath>');
+  el(sg,'rect',{x:X+1.5,y:Y+2.5,width:W,height:H,rx:4,fill:'rgba(60,40,20,.18)'});
+  el(sg,'rect',{x:X,y:Y,width:W,height:H,rx:4,fill:'url(#stk)',stroke:'rgba(80,60,40,.55)','stroke-width':'.7'});
+  var wv=el(sg,'g',{'clip-path':'url(#stkclip)',fill:'none',stroke:'#9b6a55','stroke-width':'.45',opacity:'.35'});
+  for(var k=0;k<36;k++){var y0=Y+40+k*8, d='M'+X+' '+y0; for(var x=X;x<=X+W;x+=6){d+=' L'+x+' '+(y0+2.6*Math.sin((x-X)/17+k*.7)).toFixed(2);} el(wv,'path',{d:d});}
+  el(sg,'rect',{x:X,y:Y,width:W,height:34,fill:'#24434f','clip-path':'url(#stkclip)'});
+  el(sg,'text',{x:X+16,y:Y+22,'font-family':'DejaVu Serif, serif','font-size':'10.5','letter-spacing':'1.3',fill:'#f1e9d4'},'HALQARÁ SUYU · REPUBLIC OF HALQARA');
+  el(sg,'text',{x:X+W-14,y:Y+22,'text-anchor':'end','font-family':'DejaVu Sans Mono, monospace','font-size':'12.5',fill:'#ffb4a8'},'Nº AP 0417');
+  el(sg,'text',{x:X+16,y:Y+62,'font-family':'DejaVu Serif, serif','font-size':'21','letter-spacing':'1.6',fill:'#24434f'},'APACHË ÑAN');
+  el(sg,'text',{x:X+W-16,y:Y+61,'text-anchor':'end','font-family':'DejaVu Serif, serif','font-size':'12.5','letter-spacing':'2.6',fill:'#24434f'},'HIGH PASS PERMIT');
+  el(sg,'line',{x1:X+16,x2:X+W-16,y1:Y+74.5,y2:Y+74.5,stroke:'rgba(36,67,79,.5)','stroke-width':'.75'});
+  var rows=[
+    ['Pasaq ñüm','Passport No.',P.number],
+    ['Suti','Holder','QHAPAÑA, Illarë Sisa'],
+    ['Apachë','Passes','Wilkapata 4870 m · Qaqatira 5110 m'],
+    ['Allin','Valid','1 MAY – 31 OCT each year (dry season)'],
+    ['Tukuyë','Until','02 JUN 2031 (passport expiry)'],
+    ['Mana','Void','when a pass is declared closed by snow'],
+    ['Qolqe','Fee','PAID IN KIND: 2 skeins alpaca wool'],
+    ['Quyë','Issued','QORIMARKA, 11 JUL 2022']
+  ];
+  rows.forEach(function(r,i){
+    var yy=Y+96+i*24.5;
+    var t=el(sg,'text',{x:X+16,y:yy,'font-family':FONT,'font-size':'10',fill:'#56606a'}); t.textContent=r[0]+' / ';
+    el(t,'tspan',{'font-style':'italic'},r[1]);
+    el(sg,'text',{x:X+132,y:yy,'font-family':FONT,'font-size':'13','font-weight':(i===6?'700':'500'),fill:'#1c232c'},r[2]);
+  });
+  el(sg,'text',{x:X+16,y:Y+H-14,'font-family':FONT,'font-size':'10',fill:'#56606a'},'Kamachë / ');
+  el(sg,'text',{x:X+64,y:Y+H-14,'font-family':FONT,'font-size':'10','font-style':'italic',fill:'#56606a'},'Pass warden');
+  el(sg,'path',{d:'M'+(X+132)+' '+(Y+H-16)+' c10 -14 18 -16 20 -6 c2 10 -10 8 -2 -4 c8 -10 16 -6 18 2 c3 8 12 -10 22 -8 c8 2 4 10 14 6 c10 -4 30 -6 46 -4',
+    fill:'none',stroke:'#24346b','stroke-width':'1.4','stroke-linecap':'round',opacity:'.85'});
+
+  /* --- ink stamps (navy = Halqará, red = Mayupampa, green = Chaskani) --- */
+  var NAVY='#213f7a', RED='#b02e28', GREEN='#2a6b45';
+  circleStamp(122,130,77,-9,NAVY,'HALQARÁ SUYU ✦ REPUBLIC OF HALQARA ✦','LLUQSIY','DEPARTURE','18 JUL 2022','WILKAPATA 4870 m','Nº 07',-1,'ink1');
+  rectStamp(256,60,212,104,4,RED,'MAYUPAMPA','ADMESO · ARRIVAL','19 JUL 2022','PTO. WIÑAY · RIVER POST 3',1,'ink2');
+  rectStamp(28,214,212,104,-3,RED,'MAYUPAMPA','EKSIDO · DEPARTURE','02 AUG 2022','PTO. WIÑAY · RIVER POST 3',-1,'ink3',.8);
+  circleStamp(372,262,77,12,NAVY,'HALQARÁ SUYU ✦ REPUBLIC OF HALQARA ✦','YAYKUY','ARRIVAL','03 AUG 2022','WILKAPATA 4870 m','Nº 07',1,'ink4',.82);
+  triStamp(134,430,184,-5,GREEN,'CHASKANI','KIRÏ · ARRIVAL','11 SEP 2024','SALAR Q’OCHI',1,'ink5');
+  triStamp(362,442,184,6,GREEN,'CHASKANI','ULË · DEPARTURE','25 SEP 2024','SALAR Q’OCHI',-1,'ink6',.8);
+  // fee stamp on the permit: paid in kind, in wool
+  circleStamp(X+W-56,Y+H-42,72,-14,RED,'PAKTASQA ✦ PAID IN KIND ✦ QORIMARKA ✦','2 × 250 g','ALPACA WOOL','11 JUL 2022','RECEIVED','Nº 0417',1,'ink7',.8,.82);
+})();
+document.body.setAttribute('data-ready','1');
+</script>
+</body></html>
